@@ -5,7 +5,8 @@
         "google/cloud-ai-platform": "^1.15",
         "google/cloud-core": "^1.61",
         "google/auth": "^1.45",
-        "openai-php/client": "^0.10.3"
+        "openai-php/client": "^0.10.3",
+        "vonage/client": "^4.1"
     },
     "config": {
         "allow-plugins": {

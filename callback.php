@@ -1,5 +1,6 @@
 <?php
 require 'vendor/autoload.php';
+require 'vonage.php';
 
 function getGPTResponse($query)
 {
@@ -20,24 +21,28 @@ function getGPTImageResponse($query = "What’s in this image? ")
     $base64Image = encodeImage(SAVE_IMAGE_PATH);
     $client = OpenAI::client(OPENAI_KEY);
     $data = $client->chat()->create([
-        'model'      => 'gpt-4-vision-preview',
+        'model' => 'gpt-4o-mini',
         'messages'   => [
             [
                 'role'    => 'user',
                 'content' => [
                     [
                         'type' => 'text',
-                        'text' => "$query, limit your response to 100 characters or less."
+                        'text' => "$query, describe the image thoroughly.",
                     ],
                     [
                         'type' => 'image_url',
-                        'image_url' => "data:image/jpeg;base64,$base64Image"
+                        'image_url' => [
+                            'url' => "data:image/jpeg;base64,$base64Image"
+                        ],
                     ],
                 ],
             ]
         ],
         'max_tokens' => 200,
     ]);
+
+    echo "DEBUG: ";    
 
     return $data['choices'][0]['message']['content'];
 }
@@ -83,7 +88,7 @@ function getMediaLink($mediaID)
 
     $response = curl_exec($curl);
     curl_close($curl);
-
+    echo $response;
     return json_decode($response)->url;
 }
 
@@ -118,7 +123,7 @@ function encodeImage($imagePath): string
 }
 
 // CHANGE THESE!
-define("WHATSAPP_TOKEN", "EAA7LhWBJQbYBOyDEGGWTTynrm7TkQijggXEv1WjA0nMZAnMl2qdu2lFFh7XJidASuW54V8oUVY6JTIAhgSVInFjmDXgXCZCtVrhWs1rRKJHJVQZBzGZAq3mnyVSOZCFhDSxuAD9y7krlNF05pK0dP0D6Jzt0awDd6b5ZBaWyDL5AQYvKvITGGnTSW33kZCuZB2f9ewC8BBshXmoG3kdMZA0f6zEiuX4QiYZBB3SgykFJoURP4ZD");
+define("WHATSAPP_TOKEN", "EAA7LhWBJQbYBOyyRNERwVSUGYImPb6g09eD7DHZCn9KMHAR5lBZABt5F310CZCdGvKwpEuRqcbpyYsV2eek1OTxHGeV0RW8xqxZA8F4mQleXKRrKT4Yijnzruz0Tp6IFwSx6XURrOHWfPEF7o1Bamk5rhx71ITNSVcjlZCtn4f1HDWRvxHvQGrSe7V4ZAg8OdKZCgvjZBS1AZA4oIINtPpdkHnZAaZCwWyGigfq94I6ZAPahPYwZD");
 define("WHATSAPP_SENDER_ID", "568530893007468");
 define("WHATSAPP_INCOMING_PHONE_NUMBER", "+15551532961");
 define("OPENAI_KEY", "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");
@@ -143,7 +148,7 @@ if (isset($_GET['hub_challenge'])) {
             print_r($message);
             $query = $message->text->body;
             if (file_exists(SAVE_IMAGE_PATH)) {
-                $response = getGPTImageResponse($query);
+                $response = getGPTResponse($query);
                 unlink(SAVE_IMAGE_PATH);
             } else {
                 $response = getGPTResponse($query);
@@ -154,7 +159,9 @@ if (isset($_GET['hub_challenge'])) {
             $mediaLink = getMediaLink($message->image->id);
             echo $mediaLink;
             downloadMediaLink($mediaLink);
+            $response = getGPTImageResponse();
             file_put_contents("debug.txt", $response);
+            initiateVonageCall("+15148161120", $response);
         }
     }
 }
