@@ -3,10 +3,11 @@ require 'vendor/autoload.php';
 require 'vendor/autoload.php';
 require_once 'vonage.php';
 
-// Meta Glass send a message to whats app business account
-// Whats app account send a message + image to the server
-// Server send query to chat gpt with the custom prompt
-// Get the answer back and call someone what's app phone
+// Meta glass streaming constantly on a computer
+// Extracting audio and image from the stream and send audio only to chat gpt
+// If the keyword "Urgent" is detected in the response chat gpt answers back with a message
+// When the message is detected the server sends a query with image and audio last 5 seconds to chat gpt with the custom prompt
+// The descritiption is sent as a phone call to the emergency number 
 
 function getGPTResponse($query)
 {
