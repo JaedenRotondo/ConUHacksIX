@@ -1,5 +1,12 @@
 <?php
 require 'vendor/autoload.php';
+require 'vendor/autoload.php';
+require_once 'vonage.php';
+
+// Meta Glass send a message to whats app business account
+// Whats app account send a message + image to the server
+// Server send query to chat gpt with the custom prompt
+// Get the answer back and call someone what's app phone
 
 function getGPTResponse($query)
 {
@@ -128,6 +135,21 @@ define("SAVE_IMAGE_PATH", "query_image.jpg");
 if (isset($_GET['hub_challenge'])) {
     // Used for verification of Whatsapp
     echo ($_GET['hub_challenge']);
+} else if (isset($_GET['trigger_twilio_call']) && $_GET['trigger_twilio_call'] == 'yes'){
+    try {
+        $message = <<<EOT
+ I need immediate police and medical assistance!
+I’m at 123 Main Street, Apartment 5B!
+A man with a knife is attacking people in the park!
+There are two victims injured!
+The fire is spreading fast, and I’m stuck on the second floor!
+The suspect is a tall man wearing a black hoodie and jeans, carrying a handgun!
+One person is unconscious and not breathing!
+EOT;
+        initiateVonageCall('+15148161120', $message);
+    } catch (Exception $e) {
+        echo 'Error: ' . $e->getMessage();
+    }
 } else {
     $json = file_get_contents('php://input');
 
