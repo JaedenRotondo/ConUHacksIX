@@ -118,10 +118,10 @@ function encodeImage($imagePath): string
 }
 
 // CHANGE THESE!
-define("WHATSAPP_TOKEN", "EAA7LhWBJQbYBO9C7PzwjB4oxwYEZAeRTtG9TSCpjZC4FO5RJOkmINxc0DC6kW1xAkc5g4OwOmjyZBZCjtUA73bZA6oOWRCbC1cX0IcNOCrRNk27p7K4pfQcRL1z4RZAA3s8TEfgZAdwWhyjIRf2YZAWu0RUkWsqlf0ZBOe1DkKphWPOXVkahbPgzOEZAeB85iLaQkV0ZAIRLmeBZA0m3SeNdha6VZBaZBzZBxI6BfZAMjB4yHS4m4DIZD");
+define("WHATSAPP_TOKEN", "EAA7LhWBJQbYBOyDEGGWTTynrm7TkQijggXEv1WjA0nMZAnMl2qdu2lFFh7XJidASuW54V8oUVY6JTIAhgSVInFjmDXgXCZCtVrhWs1rRKJHJVQZBzGZAq3mnyVSOZCFhDSxuAD9y7krlNF05pK0dP0D6Jzt0awDd6b5ZBaWyDL5AQYvKvITGGnTSW33kZCuZB2f9ewC8BBshXmoG3kdMZA0f6zEiuX4QiYZBB3SgykFJoURP4ZD");
 define("WHATSAPP_SENDER_ID", "568530893007468");
 define("WHATSAPP_INCOMING_PHONE_NUMBER", "+15551532961");
-define("OPENAI_KEY", "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");
+define("OPENAI_KEY", "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");
 
 define("SAVE_IMAGE_PATH", "query_image.jpg");
 
@@ -132,14 +132,15 @@ if (isset($_GET['hub_challenge'])) {
     $json = file_get_contents('php://input');
 
     // Uncomment the following lines if you need to read the incoming data from the Whastapp webhook
-    file_put_contents("debug.txt", $json);
-    die();
+    //file_put_contents("debug.txt", $json);
+    //die();
 
     $json = json_decode($json);
 
     $message = $json->entry[0]->changes[0]->value->messages[0];
-    if ($message->from == WHATSAPP_INCOMING_PHONE_NUMBER) {
+    if ($message->from == WHATSAPP_INCOMING_PHONE_NUMBER || true) {
         if ($message->type == "text") {
+            print_r($message);
             $query = $message->text->body;
             if (file_exists(SAVE_IMAGE_PATH)) {
                 $response = getGPTImageResponse($query);
@@ -147,10 +148,13 @@ if (isset($_GET['hub_challenge'])) {
             } else {
                 $response = getGPTResponse($query);
             }
+            file_put_contents("debug.txt", $response);
             sendWhatsappResponse($response);
         } else if ($message->type == "image") {
             $mediaLink = getMediaLink($message->image->id);
+            echo $mediaLink;
             downloadMediaLink($mediaLink);
+            file_put_contents("debug.txt", $response);
         }
     }
 }
